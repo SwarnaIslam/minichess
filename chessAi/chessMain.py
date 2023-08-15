@@ -26,10 +26,28 @@ def main():
 
     loadImages()
     running=True
+    sqSelected=()
+    playerClicks=[]
     while running:
         for e in p.event.get():
             if e.type==p.QUIT:
                 running=False
+            elif e.type==p.MOUSEBUTTONDOWN:
+                location=p.mouse.get_pos()
+                col=location[0]//squareSize
+                row=location[1]//squareSize
+                if sqSelected == (row,col):
+                    sqSelected=()
+                    playerClicks=[]
+                else:
+                    sqSelected=(row,col)
+                    playerClicks.append(sqSelected)
+
+                if len(playerClicks)==2:
+                    move=chessEngine.Move(playerClicks[0],playerClicks[1],gameState.board)
+                    gameState.makeMove(move)
+                    sqSelected=()
+                    playerClicks=[]
         drawGameState(screen, gameState)
         clock.tick(maxFPS)
         p.display.flip()
