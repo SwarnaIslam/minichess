@@ -46,16 +46,16 @@ def main():
                 else:
                     sqSelected = (row, col)
                     playerClicks.append(sqSelected)
-
-                if len(playerClicks) == 2:
-                    move = chessEngine.Move(playerClicks[0], playerClicks[1], gameState.board)
-                    print(move.moveID)
-                    if move in validMoves:
-                        gameState.makeMove(move)
-                        moveMade = True
-                    sqSelected = ()
-                    playerClicks = []
-
+                for i in range(len(validMoves)):
+                    if len(playerClicks) == 2:
+                        move = chessEngine.Move(playerClicks[0], playerClicks[1], gameState.board)
+                        if move==validMoves[i]:
+                            gameState.makeMove(validMoves[i])
+                            moveMade = True
+                            sqSelected = ()
+                            playerClicks = []
+                if not moveMade:
+                    playerClicks=[sqSelected]
             elif e.type == p.KEYDOWN:
                 if e.key == p.K_z:
                     gameState.undoMove()

@@ -29,6 +29,9 @@ class GameState():
         elif move.pieceMoved == 'bK':
             self.blackKingLocation = (move.endRow, move.endCol)
 
+        if move.isPawnPromotion:
+            self.board[move.endRow][move.endCol] = move.pieceMoved[0]+'Q'
+
     def undoMove(self):
         if len(self.moveLog) != 0:
             move = self.moveLog.pop()
@@ -56,7 +59,7 @@ class GameState():
                 check = self.checks[0]
                 checkRow = check[0]
                 checkCol = check[1]
-
+                print('checkRow:', checkRow, 'checkCol:',checkCol)
                 pieceChecking = self.board[checkRow][checkCol]
                 validSquares = []
                 if pieceChecking[1] == 'N':
@@ -69,10 +72,10 @@ class GameState():
                             break
                 for i in range(len(moves) - 1, -1, -1):
                     if moves[i].pieceMoved != 'K':
-                        if not (moves[i].endRow, moves[i].endCol) not in validSquares:
+                        if not (moves[i].endRow, moves[i].endCol) in validSquares:
                             moves.remove(moves[i])
             else:
-                self.getKnightMoves(kingRow, kingCol, moves)
+                self.getKingMoves(kingRow, kingCol, moves)
         else:
             moves = self.getAllPossibleMoves()
         return moves
@@ -112,7 +115,7 @@ class GameState():
                         type = endPiece[1]
                         if (0 <= i <= 3 and type == 'R') or (4 <= i <= 7 and type == 'B') or (
                                 j == 1 and type == 'p' and (
-                                (enemyColor == 'w' and 4 <= i <= 5) or (enemyColor == 'b' and 6 <= i <= 7))) or (
+                                (enemyColor == 'w' and 6 <= i <= 7) or (enemyColor == 'b' and 4 <= i <= 5))) or (
                                 type == 'Q') or (j == 1 and type == 'K'):
                             if possiblePins == ():
                                 inCheck = True
@@ -318,6 +321,9 @@ class Move():
 
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
+        self.isPawnPromotion=False
+        if (self.pieceMoved=='wp' and self.endRow==0) or (self.pieceMoved=='bp' and self.endRow==5):
+            self.isPawnPromotion=True
         self.moveID = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
 
     def __eq__(self, other):
