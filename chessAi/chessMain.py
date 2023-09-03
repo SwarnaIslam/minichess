@@ -1,12 +1,11 @@
 import pygame as p
 from chessAi import chessEngine
 
-width = 320
-height = 384
 xDimension = 5
 yDimension = 6
-
-squareSize = 64
+squareSize = 100
+width = xDimension*squareSize
+height = yDimension*squareSize
 maxFPS = 15
 
 images = {}
@@ -48,17 +47,18 @@ def main():
                     else:
                         sqSelected = (row, col)
                         playerClicks.append(sqSelected)
-                    for i in range(len(validMoves)):
-                        if len(playerClicks) == 2:
-                            move = chessEngine.Move(playerClicks[0], playerClicks[1], gameState.board)
+                    if len(playerClicks) == 2:
+                        move = chessEngine.Move(playerClicks[0], playerClicks[1], gameState.board)
+
+                        for i in range(len(validMoves)):
                             if move == validMoves[i]:
                                 gameState.makeMove(validMoves[i])
                                 moveMade = True
                                 animate=True
                                 sqSelected = ()
                                 playerClicks = []
-                    if not moveMade:
-                        playerClicks = [sqSelected]
+                        if not moveMade:
+                            playerClicks = [sqSelected]
             elif e.type == p.KEYDOWN:
                 if e.key == p.K_z:
                     gameState.undoMove()
