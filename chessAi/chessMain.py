@@ -8,6 +8,8 @@ boardWidth = xDimension * squareSize
 boardHeight = yDimension * squareSize
 panelWidth = 300
 panelHeight = boardHeight
+rank=20
+file=20
 maxFPS = 15
 
 images = {}
@@ -21,9 +23,9 @@ def loadImages():
 
 def main():
     p.init()
-    screen = p.display.set_mode((boardWidth + panelWidth, boardHeight))
+    screen = p.display.set_mode((boardWidth + panelWidth+rank*2, boardHeight+rank*2))
     clock = p.time.Clock()
-    screen.fill(p.Color("black"))
+    screen.fill(p.Color("#52240a"))
     moveLogFont = p.font.SysFont('Arial', 15, True, False)
     gameState = chessEngine.GameState()
     validMoves = gameState.getValidMoves()
@@ -34,6 +36,7 @@ def main():
     sqSelected = ()
     playerClicks = []
     gameOver = False
+    drawRankAndFile(screen,moveLogFont)
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
@@ -41,9 +44,9 @@ def main():
             elif e.type == p.MOUSEBUTTONDOWN:
                 if not gameOver:
                     location = p.mouse.get_pos()
-                    col = location[0] // squareSize
-                    row = location[1] // squareSize
-                    if sqSelected == (row, col) or col >= 5:
+                    col = (location[0]-file) // squareSize
+                    row = (location[1]-rank) // squareSize
+                    if sqSelected == (row, col) or col >= 5 or (location[0]-file)<0 or (location[1]-file)<0:
                         sqSelected = ()
                         playerClicks = []
                     else:
@@ -93,10 +96,20 @@ def drawGameState(screen, gs, validMoves, sqSelected, moveLogFont):
     highlightSquares(screen, gs, validMoves, sqSelected)
     drawPieces(screen, gs.board)
     drawMoveLog(screen, gs, moveLogFont)
-
+def drawRankAndFile(screen,font):
+    files=['a','b','c','d','e']
+    ranks=['6','5','4','3','2','1']
+    for i in range(len(files)):
+        textObject = font.render(files[i], True, p.Color('white'))
+        screen.blit(textObject, (squareSize*i+squareSize//2+rank,0))
+        screen.blit(textObject, (squareSize*i+squareSize//2+rank,boardHeight+rank))
+    for i in range(len(ranks)):
+        textObject = font.render(ranks[i], True, p.Color('white'))
+        screen.blit(textObject, (rank//2-textObject.get_width()//2,squareSize*i+squareSize//2+rank))
+        screen.blit(textObject, (boardWidth+rank+rank//2-textObject.get_width()//2,squareSize*i+squareSize//2+rank))
 
 def drawMoveLog(screen, gs, font):
-    moveLogRect = p.Rect(boardWidth, 0, panelWidth, 2000)
+    moveLogRect = p.Rect(boardWidth+2*file, 0, panelWidth, 2000)
     p.draw.rect(screen, p.Color('black'), moveLogRect)
     moveLog=gs.moveLog
     moveTexts=[]
@@ -120,11 +133,11 @@ def drawMoveLog(screen, gs, font):
             textY=padding
 def drawBoard(screen):
     global colors
-    colors = [p.Color("white"), p.Color("gray")]
+    colors = [p.Color("#f7c899"), p.Color("#CA8745")]
     for r in range(yDimension):
         for c in range(xDimension):
             color = colors[((r + c) % 2)]
-            p.draw.rect(screen, color, p.Rect(c * squareSize, r * squareSize, squareSize, squareSize))
+            p.draw.rect(screen, color, p.Rect(file+c * squareSize, rank+r * squareSize, squareSize, squareSize))
 
 
 def highlightSquares(screen, gameState, validMoves, sqSelected):
@@ -134,11 +147,11 @@ def highlightSquares(screen, gameState, validMoves, sqSelected):
             s = p.Surface((squareSize, squareSize))
             s.set_alpha(100)
             s.fill(p.Color('blue'))
-            screen.blit(s, (c * squareSize, r * squareSize))
+            screen.blit(s, (c * squareSize+file, r * squareSize+rank))
             s.fill(p.Color('yellow'))
             for move in validMoves:
                 if move.startRow == r and move.startCol == c:
-                    screen.blit(s, (squareSize * move.endCol, squareSize * move.endRow))
+                    screen.blit(s, (squareSize * move.endCol+rank, squareSize * move.endRow+rank))
     pass
 
 
@@ -147,7 +160,7 @@ def drawPieces(screen, board):
         for c in range(xDimension):
             piece = board[r][c]
             if piece != "--":
-                screen.blit(images[piece], p.Rect(c * squareSize, r * squareSize, squareSize, squareSize))
+                screen.blit(images[piece], p.Rect(c * squareSize+file, r * squareSize+rank, squareSize, squareSize))
 
 
 def animateMove(move, screen, board, clock):
@@ -161,11 +174,11 @@ def animateMove(move, screen, board, clock):
         drawBoard(screen)
         drawPieces(screen, board)
         color = colors[(move.endRow + move.endCol) % 2]
-        endSquare = p.Rect(move.endCol * squareSize, move.endRow * squareSize, squareSize, squareSize)
+        endSquare = p.Rect(move.endCol * squareSize+file, move.endRow * squareSize+rank, squareSize, squareSize)
         p.draw.rect(screen, color, endSquare)
         if move.pieceCaptured != '--':
             screen.blit(images[move.pieceCaptured], endSquare)
-        screen.blit(images[move.pieceMoved], p.Rect(c * squareSize, r * squareSize, squareSize, squareSize))
+        screen.blit(images[move.pieceMoved], p.Rect(c * squareSize+file, r * squareSize+rank, squareSize, squareSize))
         p.display.flip()
         clock.tick(60)
     pass

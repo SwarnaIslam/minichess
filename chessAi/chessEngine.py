@@ -18,8 +18,8 @@ class GameState():
         self.inCheck = False
         self.pins = []
         self.checks = []
-        self.checkmate=False
-        self.stalemate=False
+        self.checkmate = False
+        self.stalemate = False
 
     def makeMove(self, move):
         self.board[move.startRow][move.startCol] = "--"
@@ -76,12 +76,12 @@ class GameState():
                         if not (moves[i].endRow, moves[i].endCol) in validSquares:
                             moves.remove(moves[i])
             self.getKingMoves(kingRow, kingCol, moves)
-            if moves==[]:
-                self.checkmate=True
+            if moves == []:
+                self.checkmate = True
         else:
             moves = self.getAllPossibleMoves()
-            if moves==[]:
-                self.stalemate=True
+            if moves == []:
+                self.stalemate = True
         return moves
 
     def checkForPinsAndChecks(self):
@@ -325,7 +325,7 @@ class Move():
 
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
-
+        self.isCapture = self.pieceCaptured != '--'
         self.isPawnPromotion = (self.pieceMoved == 'wp' and self.endRow == 0) or (
                 self.pieceMoved == 'bp' and self.endRow == 5)
 
@@ -337,7 +337,19 @@ class Move():
         return False
 
     def getChessNotation(self):
-        return self.getRankFile(self.startRow, self.startCol) + self.getRankFile(self.endRow, self.endCol)
+        notation=self.getRankFile(self.startRow, self.startCol) + self.getRankFile(self.endRow, self.endCol)
+        if self.pieceMoved[1]!='p':
+            notation=self.pieceMoved[1]+notation
+        return notation
 
     def getRankFile(self, r, c):
         return self.colsToFiles[c] + self.rowsToRanks[r]
+
+    # def __str__(self):
+    #     endSquare=self.getRankFile(self.endRow,self.endCol)
+    #     if self.pieceMoved[1]=='p':
+    #         if self.isCapture:
+    #             return self.colsToFiles[self.startCol]+'x'+endSquare
+    #         else:
+    #             return endSquare
+    #     pass
