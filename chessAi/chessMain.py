@@ -1,5 +1,5 @@
 import pygame as p
-from chessAi import chessEngine
+from chessAi import chessEngine, SmartMoveFinder
 
 xDimension = 5
 yDimension = 6
@@ -28,7 +28,7 @@ def main():
     screen.fill(p.Color("#52240a"))
     moveLogFont = p.font.SysFont('Arial', 15, True, False)
     gameState = chessEngine.GameState()
-    validMoves = gameState.getValidMoves()
+    validMoves = gameState.getValidMoves(31)
     moveMade = False
     animate = False
     loadImages()
@@ -36,13 +36,17 @@ def main():
     sqSelected = ()
     playerClicks = []
     gameOver = False
+    playerOne=False
+    playerTwo=True
     drawRankAndFile(screen,moveLogFont)
     while running:
+        humanTurn=(gameState.whiteToMove and playerOne) or (not gameState.whiteToMove and playerTwo)
+
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
             elif e.type == p.MOUSEBUTTONDOWN:
-                if not gameOver:
+                if not gameOver and humanTurn:
                     location = p.mouse.get_pos()
                     col = (location[0]-file) // squareSize
                     row = (location[1]-rank) // squareSize
@@ -57,11 +61,13 @@ def main():
 
                         for i in range(len(validMoves)):
                             if move == validMoves[i]:
+                                # print(validMoves[0].startRow, validMoves[0].startCol)
                                 gameState.makeMove(validMoves[i])
                                 moveMade = True
                                 animate = True
                                 sqSelected = ()
                                 playerClicks = []
+                                break
                         if not moveMade:
                             playerClicks = [sqSelected]
             elif e.type == p.KEYDOWN:
@@ -71,15 +77,25 @@ def main():
                     animate = False
                 if e.key == p.K_r:
                     gameState = chessEngine.GameState()
-                    validMoves = gameState.getValidMoves()
+                    validMoves = gameState.getValidMoves(80)
                     sqSelected = ()
                     playerClicks = []
                     moveMade = False
                     animate = False
+        if not gameOver and not humanTurn:
+            # print(validMoves[0].startRow, validMoves[0].startCol)
+            AIMove=SmartMoveFinder.findBestMoveMinMax(gameState,validMoves)
+            if AIMove is None:
+                print('rand')
+                AIMove = SmartMoveFinder.findRandomMove(validMoves)
+
+            gameState.makeMove(AIMove)
+            moveMade=True
+            animate=True
         if moveMade:
             if animate:
                 animateMove(gameState.moveLog[-1], screen, gameState.board, clock)
-            validMoves = gameState.getValidMoves()
+            validMoves = gameState.getValidMoves(99)
             moveMade = False
             animate = False
         drawGameState(screen, gameState, validMoves, sqSelected, moveLogFont)

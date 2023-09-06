@@ -44,8 +44,10 @@ class GameState():
                 self.whiteKingLocation = (move.startRow, move.startCol)
             elif move.pieceMoved == 'bK':
                 self.blackKingLocation = (move.startRow, move.startCol)
-
-    def getValidMoves(self):
+            self.stalemate=False
+            self.checkmate=False
+    def getValidMoves(self,line=0):
+        # print(self.whiteToMove, line)
         moves = []
         self.inCheck, self.pins, self.checks = self.checkForPinsAndChecks()
         if self.whiteToMove:
