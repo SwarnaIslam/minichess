@@ -36,8 +36,8 @@ def main():
     sqSelected = ()
     playerClicks = []
     gameOver = False
-    playerOne=False
-    playerTwo=True
+    playerOne=True
+    playerTwo=False
     drawRankAndFile(screen,moveLogFont)
     while running:
         humanTurn=(gameState.whiteToMove and playerOne) or (not gameState.whiteToMove and playerTwo)
@@ -84,7 +84,7 @@ def main():
                     animate = False
         if not gameOver and not humanTurn:
             # print(validMoves[0].startRow, validMoves[0].startCol)
-            AIMove=SmartMoveFinder.findBestMoveMinMax(gameState,validMoves)
+            AIMove=SmartMoveFinder.findBestMove(gameState,validMoves)
             if AIMove is None:
                 print('rand')
                 AIMove = SmartMoveFinder.findRandomMove(validMoves)
