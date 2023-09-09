@@ -20,6 +20,7 @@ class GameState():
         self.checks = []
         self.checkmate = False
         self.stalemate = False
+        
 
     def makeMove(self, move):
         self.board[move.startRow][move.startCol] = "--"
