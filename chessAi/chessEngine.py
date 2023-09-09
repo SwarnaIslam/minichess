@@ -20,7 +20,6 @@ class GameState():
         self.checks = []
         self.checkmate = False
         self.stalemate = False
-        
 
     def makeMove(self, move):
         self.board[move.startRow][move.startCol] = "--"
@@ -31,7 +30,6 @@ class GameState():
             else:
                 for i in range(len(self.moveLog)-1,-1,-1):
                     if (self.moveLog[i].endRow, self.moveLog[i].endCol)==(move.startRow,move.startCol) and self.moveLog[i].pieceMoved==move.pieceMoved:
-                        print(self.moveLog[i].pieceCapturedByPawn)
                         move.pieceCapturedByPawn=self.moveLog[i].pieceCapturedByPawn
                         break
         self.moveLog.append(move)
@@ -56,8 +54,7 @@ class GameState():
                 self.blackKingLocation = (move.startRow, move.startCol)
             self.stalemate=False
             self.checkmate=False
-    def getValidMoves(self,line=0):
-        # print(self.whiteToMove, line)
+    def getValidMoves(self):
         moves = []
         self.inCheck, self.pins, self.checks = self.checkForPinsAndChecks()
         if self.whiteToMove:
@@ -165,6 +162,8 @@ class GameState():
             for c in range(len(self.board[0])):
                 turn = self.board[r][c][0]
                 if (turn == "w" and self.whiteToMove) or (turn == "b" and not self.whiteToMove):
+                    if self.board[r][c][1]=='p' and (r==0 or r==5):
+                        continue
                     piece = self.board[r][c][1]
                     self.moveFunctions[piece](r, c, moves)
         return moves
@@ -313,7 +312,8 @@ class GameState():
                     if endPiece[0] != allyColor:
                         moves.append(Move((r, c), (endRow, endCol), self.board))
 
-
+    def isGameOver(self):
+        return self.stalemate or self.checkmate
 class Move():
     ranksToRows = {
         "1": 5, "2": 4, "3": 3, "4": 2, "5": 1, "6": 0
@@ -353,5 +353,3 @@ class Move():
 
     def getRankFile(self, r, c):
         return self.colsToFiles[c] + self.rowsToRanks[r]
-
-
