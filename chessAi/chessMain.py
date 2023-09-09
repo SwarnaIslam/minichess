@@ -14,7 +14,6 @@ maxFPS = 15
 
 images = {}
 
-
 def loadImages():
     pieces = ['bR', 'bB', 'bK', 'bQ', 'bN', 'bp', 'wR', 'wB', 'wK', 'wQ', 'wN', 'wp']
     for piece in pieces:
