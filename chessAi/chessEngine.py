@@ -24,6 +24,15 @@ class GameState():
     def makeMove(self, move):
         self.board[move.startRow][move.startCol] = "--"
         self.board[move.endRow][move.endCol] = move.pieceMoved
+        if move.pieceMoved[1]=='p':
+            if move.pieceCaptured[1]!='-':
+                move.pieceCapturedByPawn=move.pieceCaptured[1]
+            else:
+                for i in range(len(self.moveLog)-1,-1,-1):
+                    if (self.moveLog[i].endRow, self.moveLog[i].endCol)==(move.startRow,move.startCol) and self.moveLog[i].pieceMoved==move.pieceMoved:
+                        print(self.moveLog[i].pieceCapturedByPawn)
+                        move.pieceCapturedByPawn=self.moveLog[i].pieceCapturedByPawn
+                        break
         self.moveLog.append(move)
         self.whiteToMove = not self.whiteToMove
         if move.pieceMoved == 'wK':
@@ -32,7 +41,7 @@ class GameState():
             self.blackKingLocation = (move.endRow, move.endCol)
 
         if move.isPawnPromotion:
-            self.board[move.endRow][move.endCol] = move.pieceMoved[0] + 'Q'
+            self.board[move.endRow][move.endCol] = move.pieceMoved[0] + move.pieceCapturedByPawn
 
     def undoMove(self):
         if len(self.moveLog) != 0:
@@ -323,7 +332,8 @@ class Move():
 
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
-        self.isCapture = self.pieceCaptured != '--'
+
+        self.pieceCapturedByPawn= 'p'
         self.isPawnPromotion = (self.pieceMoved == 'wp' and self.endRow == 0) or (
                 self.pieceMoved == 'bp' and self.endRow == 5)
 
@@ -343,11 +353,4 @@ class Move():
     def getRankFile(self, r, c):
         return self.colsToFiles[c] + self.rowsToRanks[r]
 
-    # def __str__(self):
-    #     endSquare=self.getRankFile(self.endRow,self.endCol)
-    #     if self.pieceMoved[1]=='p':
-    #         if self.isCapture:
-    #             return self.colsToFiles[self.startCol]+'x'+endSquare
-    #         else:
-    #             return endSquare
-    #     pass
+
