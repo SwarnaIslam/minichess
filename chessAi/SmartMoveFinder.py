@@ -3,80 +3,43 @@ import random
 pieceScore = {'K': 0, 'Q': 9, 'R': 5, 'B': 3, 'N': 3, 'p': 1}
 checkmate = 1000
 stalemate = 0
-DEPTH = 9
+DEPTH = 7
 
 
 def findRandomMove(validMoves):
-    print('Random move is used')
     return validMoves[random.randint(0, len(validMoves) - 1)]
 
 
 def findBestMove(gs, validMoves):
     global nextMove
-    global undoC
-    global moveC
-    undoC = 0
-    moveC = 0
     nextMove = None
     random.shuffle(validMoves)
-    findMoveNegaMaxAlphaBetaPVS(gs, validMoves, DEPTH, -checkmate, checkmate, 1 if gs.whiteToMove else -1)
-    print(moveC, undoC)
+    findMoveNegaMaxAlphaBeta(gs, validMoves, DEPTH, -checkmate, checkmate,  1 if gs.whiteToMove else -1)
     return nextMove
 
 
-def findMoveNegaMaxAlphaBetaPVS(gs, validMoves, depth, alpha, beta, turnMultiplier):
+def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, alpha, beta, turnMultiplier):
     global nextMove
-    global undoC
-    global moveC
     if depth == 0:
         return turnMultiplier * scoreBoard(gs)
     
-    # Implement move ordering here
     orderedMoves = orderMoves(validMoves, gs)
-    
+
     maxScore = -checkmate
-    
-    # First move (the principal variation)
-    if len(orderedMoves) > 0:
-        move = orderedMoves[0]
-        gs.makeMove(move)
-        moveC = moveC + 1
-        nextMoves = gs.getValidMoves()
-        score = -findMoveNegaMaxAlphaBetaPVS(gs, nextMoves, depth - 1, -beta, -alpha, -turnMultiplier)
-        gs.undoMove()
-        undoC = undoC + 1
-        
-        if score > maxScore:
-            maxScore = score
-            if depth == DEPTH :
-                nextMove = move
-            alpha = max(alpha, score)
-            if alpha >= beta:
-                return maxScore
-    
-    # Remaining moves (null window search)
     for i in range(1, len(orderedMoves)):
         move = orderedMoves[i]
         gs.makeMove(move)
-        moveC = moveC + 1
         nextMoves = gs.getValidMoves()
-        score = -findMoveNegaMaxAlphaBetaPVS(gs, nextMoves, depth - 1, -alpha - 1, -alpha, -turnMultiplier)
-        
-        # Re-search if the score exceeds the alpha-beta window
-        if alpha < score < beta:
-            score = -findMoveNegaMaxAlphaBetaPVS(gs, nextMoves, depth - 1, -beta, -score, -turnMultiplier)
-        
-        gs.undoMove()
-        undoC = undoC + 1
-        
+        score = -findMoveNegaMaxAlphaBeta(gs, nextMoves, depth - 1,-beta,-alpha, -turnMultiplier)
         if score > maxScore:
             maxScore = score
-            if depth == DEPTH: 
+            if depth == DEPTH:
                 nextMove = move
-            alpha = max(alpha, score)
-            if alpha >= beta:
-                break
-    
+        gs.undoMove()
+        if maxScore>alpha:
+            alpha=maxScore
+        if alpha>=beta:
+            break
     return maxScore
 
 
@@ -96,6 +59,7 @@ def scoreBoard(gs):
             elif square[0] == 'b':
                 score -= pieceScore[square[1]]
     return score
+
 
 def orderMoves(validMoves, gs):
     # Create a list to store the ordered moves
