@@ -31,7 +31,7 @@ def isHumanTurn(gameState):
     return (gameState.whiteToMove and playerOne) or (not gameState.whiteToMove and playerTwo)
 
 def isCellReset(sqSelected, location, row, col):
-    return sqSelected == (row, col) or col >= 5 or (location[0] - file) < 0 or (location[1] - file) < 0
+    return sqSelected == (row, col) or location[0]<file or location[0]>file+boardWidth or location[1]<rank or location[1]>rank+boardHeight
 def validCellSelected(playerClicks):
     return len(playerClicks) == 2
 
