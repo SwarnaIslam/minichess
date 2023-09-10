@@ -4,6 +4,8 @@ import chessEngine, SmartMoveFinder
 xDimension = 5
 yDimension = 6
 squareSize = 100
+pawnHeight = 85
+pawnWidht = 39
 rank = 20
 file = 20
 boardWidth = xDimension * squareSize
@@ -16,14 +18,14 @@ btnWidth=300
 btnHeight=40
 playerOne = True
 playerTwo = False
-maxFPS = 15
+maxFPS = 60
 
 images = {}
 
 def loadImages():
     pieces = ['bR', 'bB', 'bK', 'bQ', 'bN', 'bp', 'wR', 'wB', 'wK', 'wQ', 'wN', 'wp']
     for piece in pieces:
-        images[piece] = p.transform.scale(p.image.load('chessAi/images/' + piece + '.png'), (squareSize, squareSize))
+        images[piece] = p.transform.scale(p.image.load('chessAi/images/' + piece + '.png'), (pawnWidht, pawnHeight))
 
 def isHumanTurn(gameState):
     return (gameState.whiteToMove and playerOne) or (not gameState.whiteToMove and playerTwo)
@@ -39,7 +41,7 @@ def get_btn_text_position(btn, btn_text):
     return textX,textY
 
 def getBtn(screen,x,y, btnFont, text):
-    btn=p.draw.rect(screen, p.Color("#81b64c"),p.Rect(x, y, 300, btnHeight), 0, 10)
+    btn=p.draw.rect(screen, p.Color("#779556"),p.Rect(x, y, 300, btnHeight), 0, 10)
     btn_text = btnFont.render(text, True, p.Color("white"))
     screen.blit(btn_text, (get_btn_text_position(btn, btn_text)))
     return btn
@@ -51,7 +53,7 @@ def main():
     screen = p.display.set_mode((boardWidth + panelWidth + rank * 2, boardHeight + rank * 2))
     clock = p.time.Clock()
 
-    screen.fill(p.Color("#302e2b"))
+    screen.fill(p.Color("#61210F"))
     moveLogFont = p.font.SysFont('Arial', 15, True, False)
     btnFont=p.font.SysFont("Arial",20,True,False)
     gameState = chessEngine.GameState()
@@ -202,7 +204,7 @@ def drawRankAndFile(screen, font):
 
 def drawMoveLog(screen, gs, font):
     moveLogRect = p.Rect(panelX, 0, panelWidth, panelHeight)
-    p.draw.rect(screen, p.Color('black'), moveLogRect)
+    p.draw.rect(screen, p.Color('#341a0e'), moveLogRect)
     moveLog = gs.moveLog
     moveTexts = []
     for i in range(0, len(moveLog), 2):
@@ -212,7 +214,7 @@ def drawMoveLog(screen, gs, font):
         moveTexts.append(moveString)
     padding = 5
     lineSpacing = 2
-    moveLogObj=p.font.SysFont('Arial', 25, True, True).render("MOVELOG",True, p.Color('#f7c899'))
+    moveLogObj=p.font.SysFont('Arial', 25, True, True).render("MOVELOG",True, p.Color('white'))
     screen.blit(moveLogObj, moveLogRect.move(panelWidth/2-moveLogObj.get_width()/2,padding))
     textX = padding
     textY = moveLogObj.get_height()+padding
@@ -229,7 +231,7 @@ def drawMoveLog(screen, gs, font):
 
 def drawBoard(screen):
     global colors
-    colors = [p.Color("#ebecd0"), p.Color("#779556")]
+    colors = [p.Color("#E3C16F"), p.Color("#779556")]
     for r in range(yDimension):
         for c in range(xDimension):
             color = colors[((r + c) % 2)]
@@ -256,29 +258,54 @@ def drawPieces(screen, board):
         for c in range(xDimension):
             piece = board[r][c]
             if piece != "--":
-                screen.blit(images[piece], p.Rect(c * squareSize + file, r * squareSize + rank, squareSize, squareSize))
+                square_center_x = c * squareSize + squareSize // 2 + file
+                square_center_y = r * squareSize + squareSize // 2 + rank
+
+                piece_x = square_center_x - pawnWidht // 2
+                piece_y = square_center_y - pawnHeight // 2
+
+                screen.blit(images[piece], p.Rect(piece_x, piece_y, pawnWidht, pawnHeight))
 
 
 def animateMove(move, screen, board, clock):
     global colors
+
     dR = move.endRow - move.startRow
     dC = move.endCol - move.startCol
-    framesPerSquare = 10
+
+    framesPerSquare = 20
     frameCount = (abs(dR) + abs(dC)) * framesPerSquare
-    for frame in range(frameCount + 1):
-        r, c = (move.startRow + dR * frame / frameCount, move.startCol + dC * frame / frameCount)
+
+    start_x = (move.startCol * squareSize + squareSize // 2 + file, move.startRow * squareSize + squareSize // 2 + rank)
+    end_x = (move.endCol * squareSize + squareSize // 2 + file, move.endRow * squareSize + squareSize // 2 + rank)
+
+    delta_x = ((end_x[0] - start_x[0]) / frameCount, (end_x[1] - start_x[1]) / frameCount)
+
+    for frame in range(frameCount - 1):
+        current_x = (int(start_x[0] + frame * delta_x[0]), int(start_x[1] + frame * delta_x[1]))
+
         drawBoard(screen)
         drawPieces(screen, board)
+
         color = colors[(move.endRow + move.endCol) % 2]
+
         endSquare = p.Rect(move.endCol * squareSize + file, move.endRow * squareSize + rank, squareSize, squareSize)
         p.draw.rect(screen, color, endSquare)
+
         if move.pieceCaptured != '--':
             screen.blit(images[move.pieceCaptured], endSquare)
-        screen.blit(images[move.pieceMoved],
-                    p.Rect(c * squareSize + file, r * squareSize + rank, squareSize, squareSize))
+
+        piece_x = current_x[0] - pawnWidht // 2
+        piece_y = current_x[1] - pawnHeight // 2 
+
+        screen.blit(images[move.pieceMoved], p.Rect(piece_x, piece_y, pawnWidht, pawnHeight))
+
         p.display.flip()
+
         clock.tick(60)
-    pass
+
+
+
 
 
 def drawEndGameText(screen, text):
