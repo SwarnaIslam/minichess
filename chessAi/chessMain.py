@@ -231,7 +231,7 @@ def drawMoveLog(screen, gs, font):
 
 def drawBoard(screen):
     global colors
-    colors = [p.Color("#E3C16F"), p.Color("#779556")]
+    colors = [p.Color("#EBECD0"), p.Color("#779556")]
     for r in range(yDimension):
         for c in range(xDimension):
             color = colors[((r + c) % 2)]

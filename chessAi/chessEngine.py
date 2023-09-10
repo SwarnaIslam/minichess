@@ -293,23 +293,6 @@ class GameState():
         self.getRookMoves(r, c, moves)
         self.getBishopMoves(r, c, moves)
 
-    def isCapture(self, move):
-        if self.board[move.endRow][move.endCol] != '--':
-            return True
-        return False
-
-    def isCheck(self, move):
-        # Make the move temporarily
-        self.makeMove(move)
-        
-        # Determine if the opponent's king is in check
-        is_check = self.inCheck
-        
-        # Undo the move
-        self.undoMove()
-        
-        return is_check
-
 
     def getKnightMoves(self, r, c, moves):
         piecePinned = False
