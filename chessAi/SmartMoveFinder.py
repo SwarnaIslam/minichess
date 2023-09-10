@@ -4,7 +4,7 @@ import time
 pieceScore = {'K': 0, 'Q': 9, 'R': 5, 'B': 3, 'N': 3, 'p': 1}
 checkmate = 1000
 stalemate = 0
-DEPTH = 5
+DEPTH = 7
 
 
 def findRandomMove(validMoves):
@@ -120,7 +120,9 @@ def orderMoves(validMoves, gs):
         return score
     
     orderedMoves = sorted(validMoves, key=evaluate_move, reverse=True)
+
+    # print('Total moves: ', len(orderedMoves))
     
-    return orderedMoves
+    return orderedMoves[:10]
 
 
