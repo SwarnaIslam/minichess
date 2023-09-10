@@ -4,7 +4,7 @@ import time
 pieceScore = {'K': 0, 'Q': 9, 'R': 5, 'B': 3, 'N': 3, 'p': 1}
 checkmate = 1000
 stalemate = 0
-DEPTH = 7
+DEPTH = 5
 
 
 def findRandomMove(validMoves):
@@ -111,10 +111,10 @@ def orderMoves(validMoves, gs):
     def evaluate_move(move):
         score = 0
         if move.pieceCaptured!='--':
-            score += 10*pieceScore[move.pieceCaptured[1]]
+            score += pieceScore[move.pieceCaptured[1]] / 2
         if gs.checkmate:
             if gs.whiteToMove:
-                score= -checkmate
+                score -= checkmate
             else:
                 score+= checkmate
         return score
