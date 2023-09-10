@@ -1,4 +1,5 @@
 import random
+import time
 
 pieceScore = {'K': 0, 'Q': 9, 'R': 5, 'B': 3, 'N': 3, 'p': 1}
 checkmate = 1000
@@ -19,8 +20,17 @@ def findBestMove(gs, validMoves):
     moveC = 0
     nextMove = None
     random.shuffle(validMoves)
+
+    start_time = time.time()
+    
     findMoveNegaMaxAlphaBetaPVS(gs, validMoves, DEPTH, -checkmate, checkmate, 1 if gs.whiteToMove else -1)
-    print(moveC, undoC)
+
+    end_time = time.time()
+
+    elapsed_time = end_time - start_time
+    print("Time taken to find a move: {:.2f} seconds".format(elapsed_time))
+    print('Move counted: ', moveC)
+
     return nextMove
 
 
